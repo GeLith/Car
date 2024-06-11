@@ -1,0 +1,263 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <title>查询</title>
+    <link rel="stylesheet" href="css/public.css">
+    <link rel="stylesheet" href="css/query.css">
+    <script src="script/jquery-3.2.1.min.js"></script>
+</head>
+<body>
+    <div id="body" v-cloak>
+        <div class="div_select">
+            <div class="div_name">
+                <img src="img/p.png" alt="">
+                <div>选择你爱车所在的停车场</div>
+            </div>
+            <div class="div_select_se">
+                <select name="" id="">
+                    <option>南洋花园</option>
+                    <option>华天花园</option>
+                    <option>海洋花园</option>
+                    <option>翔安花园</option>
+                </select>
+            </div>
+        </div>
+        <div class="div_input">
+            <div class="div_name">
+                输入车牌号查询停车费
+            </div>
+            <div class="div_licensePlate">
+                <ul>
+                    <li v-bind:class="{'li_show':input_index==0}">
+                        <input type="text" maxlength="1" v-model="inputtext.substring(0,1)" @blur="animateWidth(0,'blur')" @focus="animateWidth(0,'focus')">
+                    </li>
+                    <li  v-bind:class="{'li_show':input_index==1}">
+                        <input type="text" maxlength="1" v-model="inputtext.substring(1,2)" @blur="animateWidth(1,'blur')" @focus="animateWidth(1,'focus')">
+                    </li>
+                    <li v-bind:class="{'li_show':input_index==2}">
+                        <input type="text" maxlength="1"  v-model="inputtext.substring(2,3)"  @blur="animateWidth(2,'blur')" @focus="animateWidth(2,'focus')">
+                    </li>
+                    <li v-bind:class="{'li_show':input_index==3}">
+                        <input type="text" maxlength="1"  v-model="inputtext.substring(3,4)"  @blur="animateWidth(3,'blur')" @focus="animateWidth(3,'focus')">
+                    </li>
+                    <li v-bind:class="{'li_show':input_index==4}">
+                        <input type="text" maxlength="1"  v-model="inputtext.substring(4,5)"  @blur="animateWidth(4,'blur')" @focus="animateWidth(4,'focus')">
+                    </li>
+                    <li v-bind:class="{'li_show':input_index==5}">
+                        <input type="text" maxlength="1"  v-model="inputtext.substring(5,6)"  @blur="animateWidth(5,'blur')" @focus="animateWidth(5,'focus')">
+                    </li>
+                    <li v-bind:class="{'li_show':input_index==6}">
+                        <input type="text" maxlength="1"  v-model="inputtext.substring(6,7)"  @blur="animateWidth(6,'blur')" @focus="animateWidth(6,'focus')">
+                    </li>
+                    <li v-if="ifNewEnergy"  v-bind:class="{'li_show':input_index==7}">
+                        <input type="text" maxlength="1"  v-model="inputtext.substring(7,8)"  @blur="animateWidth(7,'blur')" @focus="animateWidth(7,'focus')">
+                    </li>
+                </ul>
+            </div>
+            <div class="div_check" v-on:click="ifNewEnergy=!ifNewEnergy">
+                <div class="div_left" v-bind:class="{'check':ifNewEnergy}">
+                    <img src="img/check.png" alt="">
+                </div>
+                <div class="div_right">
+                    是否为新能源车牌
+                </div>
+            </div>
+            <div class="div_button" v-on:click="button">
+                查询缴费
+            </div>
+        </div>
+        <div class="div_explain">
+            <div class="div_name">
+                支付费用说明：
+            </div>
+           <div class="div_text">
+               <p>1.前30分钟免费；</p>
+               <p>2.30分钟后每小时5块钱；</p>
+               <p>3.若没满一小时按一小时算。</p>
+               <p> </p>
+           </div>
+             <div class="div_name">
+                 临停支付说明
+             </div>
+            <div class="div_text">
+                <p>1.若因特殊原因无法查询车辆信息，请至人工收费处进行处理；</p>
+                <p>2.查询缴费前请仔细核对停车场、车牌号；</p>
+                <p>3.若无法加载页面，请检查网络是否畅通或耐心等待、重新加载页面。</p>
+            </div>
+        </div>
+        <div id="keycontent" v-if="keycontentShow">
+            <div id="keyboard">
+                <div class="keyTitle" v-on:click="button_close">关闭</div>
+                <div class="keyContent">
+                    <ul>
+                        <li v-for="(nub,index) in list" v-bind:class="li_show(index,listType)" v-on:click="keycontent_val(nub)"><div>{{nub}}</div></li>
+                    </ul>
+                    <div class="button_tab button"  v-on:click="listType=!listType">
+                        <div>切换</div>
+                    </div>
+                    <div class="button_delete button" v-on:click="button_delete">
+                        <div>删除</div>
+                    </div>
+                </div>
+            </div>
+            <div id="keyMask" v-on:click="button_close">
+
+            </div>
+        </div>
+    </div>
+    <script src="script/vue.js"></script>
+    <script>
+        new Vue({
+            el:"#body",
+            data:{
+                ifNewEnergy:false,
+                inputtext:"",
+                list:[],
+                listType:true,
+                keycontentShow:false,
+                licensePlate_provinces: [
+                    "京", "沪", "粤","津","冀","晋","蒙","辽","吉","黑",
+                    "苏","浙", "皖","闽","赣","鲁","豫","鄂","湘","桂",
+                    "琼","渝","川","贵","云","藏","陕","甘","青","宁",
+                    "新","使","领","警","学","港","澳"
+                ],
+                licensePlate_letter: [
+                    "1", "2", "3","4", "5", "6","7", "8", "9","0",
+                    "Q","W", "E", "R", "T", "Y", "U","I", "O", "P",
+                    "A", "S", "D","F", "G", "H", "J", "K", "L",
+                    "Z", "X", "C", "V", "B", "N", "M"
+                ],
+                input_index:0
+            },
+            watch:{
+                listType:function(val,oldval) {
+                    this.setList();
+                }
+            },
+            created:function () {
+            },
+            computed:{
+            },
+            methods:{
+                li_show:function (index,type) {
+                    // console.log(index+"==="+type);
+                    if(type){
+                        if(index==30){
+                            return "li_2";
+                        }
+                    }else{
+                        if(index==20){
+                            return "li_1";
+                        }
+                        if(index==29){
+                            return "li_2";
+                        }
+                    }
+                },
+                setList:function () {
+                    if(this.listType){
+                        this.list = this.licensePlate_provinces;
+                    }else{
+                        this.list = this.licensePlate_letter;
+                    }
+                },
+                animateWidth:function (index,type) {
+                    document.activeElement.blur();
+                    if(index==0){
+                        if(type=='blur'){
+                            this.input_index = 0;
+                            console.log("移除省");
+                        }else{
+                            this.input_index = index;
+                            console.log("移入省");
+                            this.keycontentShow = true;
+                            this.listType = true;
+                        }
+                    }else if(index==1){
+                        if(type=='blur'){
+                            console.log("移除字母");
+                            this.input_index = 0;
+                        }else{
+                            this.input_index = index;
+                            console.log("移入字母");
+                            this.keycontentShow = true;
+                            this.listType = false;
+                        }
+                    }else{
+                        if(type=='blur'){
+                            console.log("移除");
+                            this.input_index = 0;
+                        }else{
+                            this.input_index = index;
+                            console.log("移入");
+                            this.keycontentShow = true;
+                            this.listType = false;
+                        }
+                    }
+                },
+                button_delete:function () {
+                    var t = [];
+                    if(this.ifNewEnergy){
+                        t = ["","","","","","","",""];
+                    }else{
+                        t = ["","","","","","",""];
+                    }
+                    var i = this.input_index;
+                    if(i-1!=t.length){
+                        if(!this.ifNewEnergy){
+                            i--;
+                        }
+                    };
+                    $.each(this.inputtext.split(""),function (k,v) {
+                        t[k]= v;
+                    });
+                    console.log(i);
+                    $.each(t,function (k,v) {
+                        if(k==i){
+                            t[k] = "";
+                        }
+                    });
+                    this.inputtext = t.join('');
+                    console.log(t);
+                    this.input_index>0?this.input_index--:this.input_index;
+                    this.animateWidth(this.input_index,"focus");
+                },
+                button_close:function () {
+                    this.keycontentShow = false;
+                },
+                keycontent_val:function (val) {
+                    var i = this.input_index;
+                    var t = [];
+                    if(this.ifNewEnergy){
+                        t = ["","","","","","","",""];
+                    }else{
+                        t = ["","","","","","",""];
+                    }
+                    $.each(this.inputtext.split(""),function (k,v) {
+                        t[k]= v;
+                    });
+                    $.each(t,function (k,v) {
+                        if(k==i){
+                            t[k] = val;
+                        }
+                    });
+                    console.log(t);
+                    this.inputtext = t.join('');
+                    console.log(this.input_index);
+                    this.input_index<7?this.input_index++:this.input_index;
+                    this.animateWidth(this.input_index,"focus");
+                },
+                button:function () {
+                    location.href="pay.html";
+                }
+            },
+            mounted:function () {
+                this.listType = true;
+                this.setList();
+            }
+        })
+    </script>
+</body>
+</html>
